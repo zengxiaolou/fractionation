@@ -1,11 +1,18 @@
-import path from 'node:path';
+import path, { join } from 'node:path';
 import url from 'node:url';
-import { BrowserWindow } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import isDev from 'electron-is-dev';
 import { MAIN_PAGE_DIRECTION } from '@/pages/main/const';
 import { stateManager } from '@/components/singletons';
+import { registerIpcHandler } from '@/pages/main/ipc-handlers';
 
 let win = stateManager.getMainWindow();
+
+const init = () => {
+  registerIpcHandler();
+};
+
+init();
 
 function create() {
   win = new BrowserWindow({
@@ -48,6 +55,8 @@ function create() {
   win.on('closed', () => {
     stateManager.setMainWindow();
   });
+  const a = join(app.getPath('userData'), 'fraction.db');
+  console.log(a);
   return win;
 }
 

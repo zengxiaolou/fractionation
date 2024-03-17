@@ -76,7 +76,8 @@
     "moment-timezone": "^0.5.43",
     "node-schedule": "^2.1.1",
     "nodemailer": "^6.9.7",
-    "play-sound": "^1.1.6"
+    "play-sound": "^1.1.6",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.0",
