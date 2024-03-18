@@ -1,5 +1,5 @@
 {
-  "name": "xc",
+  "name": "fraction",
   "version": "1.0.0",
   "description": "auto order",
   "main": "app/build/index.js",
@@ -43,8 +43,8 @@
     "@": "app/build"
   },
   "build": {
-    "appId": "com.ruler.xc",
-    "productName": "xc",
+    "appId": "com.ruler.fraction",
+    "productName": "fraction",
     "directories": {
       "output": "build"
     },
