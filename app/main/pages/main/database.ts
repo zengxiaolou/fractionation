@@ -17,6 +17,7 @@ class DatabaseManager {
     this.db.run(
       `CREATE TABLE IF NOT EXISTS fraction (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        customer_id INTEGER NOT NULL,
       name TEXT,
       level TEXT,
       created_at DATETIME
@@ -30,11 +31,11 @@ class DatabaseManager {
   }
 
   public save(data: Data): Promise<Data| Error>  {
-    const {name, level} = data;
+    const {customer_id, name, level} = data;
     const now = new Date();
-    const query = `INSERT INTO fraction (name, level, created_at) VALUES (?,?,?)`
+    const query = `INSERT INTO fraction (customer_id, name, level, created_at) VALUES (?,?,?)`
     return new Promise((resolve, reject) => {
-      this.db?.run(query, [name, level, now], (error: Error| null) => {
+      this.db?.run(query, [customer_id, name, level, now], (error: Error| null) => {
         if (error) {
           reject(error);
         } else {
@@ -46,9 +47,9 @@ class DatabaseManager {
 
   public saveAll(dataArray: Data[]): Promise<Data[] | Error> {
     const now = new Date();
-    let placeholders = dataArray.map(() => '(?,?,?)').join(',');
-    let flatData = dataArray.flatMap(data => [data.name, data.level, now]);
-    const query = `INSERT INTO fraction (name, level, created_at) VALUES ${placeholders}`;
+    let placeholders = dataArray.map(() => '(?,?,?,?)').join(',');
+    let flatData = dataArray.flatMap(data => [data.customer_id, data.name, data.level, now]);
+    const query = `INSERT INTO fraction (customer_id, name, level, created_at) VALUES ${placeholders}`;
 
 
     return new Promise((resolve, reject) => {
@@ -94,7 +95,7 @@ class DatabaseManager {
 
     if (parameters?.page_size && parameters?.page_size > 0 && parameters?.page_number) {
       const offset = parameters.page_size * (parameters.page_number - 1);
-      query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+      query += ' ORDER BY customer_id ASC LIMIT ? OFFSET ?';
       queryParameters.push(parameters.page_size, offset);
     }
 

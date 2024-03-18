@@ -1,5 +1,6 @@
 export interface Data {
   id?: number;
+  customer_id: number
   name: string;
   level: string;
   createdAt?: Date;

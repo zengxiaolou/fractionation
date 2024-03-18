@@ -1,29 +1,16 @@
 import styled from 'styled-components';
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Select, Space, Table, Upload, Notification } from '@arco-design/web-react';
+import { Button, Form, Input, Select, Space, Table, Upload, Notification, Alert } from '@arco-design/web-react';
 import * as XLSX from 'xlsx';
 import StatisticsModal from '@/main/StatisticsModal';
 import dayjs from 'dayjs';
+import HighLevelModal from '@/main/HighLevelModal';
 
 const FormItem = Form.Item;
 
 const format: string = "YYYY-MM-DD HH:mm:ss";
 
-const columns = [
-  {
-    title: '姓名',
-    dataIndex: 'name',
-  },
-  {
-    title: '评级',
-    dataIndex: 'level',
-  },
-  {
-    title: '上传时间',
-    dataIndex: 'created_at',
-    render: (col: number) =>  dayjs(col).format(format)
-  },
-]
+
 
 interface Page  {
   page_size: number,
@@ -52,6 +39,9 @@ const Main = () => {
   const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [page, setPage] = useState<Page>({ page_number: 1, page_size: 10 });
+  const [highLevelModalVisible, setHighLevelModalVisible] = useState<boolean>(false);
+  const [highNum, setHighNum] = useState<number>(0);
+
 
   const [form] = Form.useForm()
   const getData = async (queryData: any) => {
@@ -67,6 +57,45 @@ const Main = () => {
     setLoading(false);
   };
 
+  const getAData = async () => {
+    const res = await window.ipc.getData({ level: 'A类（重点照护类）', page_size: 10, page_number: 1 });
+    if (res) {
+      setHighNum(res.total);
+      setHighLevelModalVisible(true)
+    }
+  }
+
+  const handleLevel = (level: string) => {
+    if (level === 'A类（重点照护类）') {
+      return <span style={{color: 'red'}}>{level}</span>
+    }else if (level === 'B类（康养自理类）') {
+      return <span style={{color: 'orange'}}>{level}</span>
+    }else if (level === 'C类（健康活力类）') {
+      return <span style={{color: 'green'}}>{level}</span>
+    }
+  }
+
+  const columns = [
+    {
+     title: '序号',
+     dataIndex: 'customer_id',
+    },
+    {
+      title: '姓名',
+      dataIndex: 'name',
+    },
+    {
+      title: '评级',
+      dataIndex: 'level',
+      render: (level: string) => handleLevel(level)
+    },
+    {
+      title: '上传时间',
+      dataIndex: 'created_at',
+      render: (col: number) =>  dayjs(col).format(format)
+    },
+  ]
+
   const handlePageChange = (pageNumber: number, pageSize: number) => {
     const formData = form.getFieldsValue();
       const queryData = {...formData, page_size: pageSize, page_number: pageNumber };
@@ -78,6 +107,10 @@ const Main = () => {
     getData({ page_size: 10, page_number: 1 });
   }, [])
 
+  useEffect(() => {
+    getAData();
+  }, [])
+
   const handleFormChange = () => {
     const formData = form.getFieldsValue();
     if (formData) {
@@ -85,7 +118,6 @@ const Main = () => {
       getData(queryData);
     }
   }
-
 
   const handleUpload = (file: any) => {
     const reader = new FileReader();
@@ -112,6 +144,7 @@ const Main = () => {
       const res = await window.ipc.saveData(data)
       if (res) {
         Notification.success({content: "数据保存成功"})
+        getData({ page_size: 10, page_number: 1 });
       } else {
         Notification.error({content: "数据保存失败, 请重新导入"})
       }
@@ -128,7 +161,7 @@ const Main = () => {
             <Input prefix="名字查询"/>
           </FormItem>
           <FormItem field='level' noStyle>
-            <Select style={{width: 300}} prefix="等级" options={level}/>
+            <Select style={{width: 300}} prefix="等级" options={level} allowClear/>
           </FormItem>
         </Space>
       </Form>
@@ -146,6 +179,7 @@ const Main = () => {
         onChange: handlePageChange}}/>
     </Body>
     <StatisticsModal visible={visible} onCancel={() => setVisible(false)} data={rating} onSubmit={() => setVisible(false)}/>
+    <HighLevelModal visible={highLevelModalVisible} onCancel={() =>setHighLevelModalVisible(false)} data={highNum} onSubmit={() => setHighLevelModalVisible(false)}/>
   </Wrapper>)
 }
 
